@@ -7,9 +7,9 @@
 const hre = require("hardhat");
 
 async function main() {
-  const NAME = 'Dapp University'
-  const SYMBOL = 'DAPP'
-  const MAX_SUPPLY = '1000000'
+  const NAME = 'Ghost Rogue'
+  const SYMBOL = 'GHSRG'
+  const MAX_SUPPLY = '1000000000'
 
   // Deploy Token
   const Token = await hre.ethers.getContractFactory('Token')

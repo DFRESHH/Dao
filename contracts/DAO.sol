@@ -5,7 +5,7 @@ import "hardhat/console.sol";
 import "./Token.sol";
 
 contract DAO {
-    address owner;
+    address public owner;
     Token public token;
     uint256 public quorum;
 
@@ -21,7 +21,7 @@ contract DAO {
     uint256 public proposalCount;
     mapping(uint256 => Proposal) public proposals;
 
-    mapping(address => mapping(uint256 => bool)) votes;
+    mapping(address => mapping(uint256 => bool)) public votes;
 
     event Propose(
         uint id,

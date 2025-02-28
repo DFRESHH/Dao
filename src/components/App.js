@@ -19,7 +19,7 @@ function App() {
   const [dao, setDao] = useState(null)
   const [treasuryBalance, setTreasuryBalance] = useState(0)
 
-  const [account, setAccount] = useState(null)
+  const [account, setAccount] = useState("")
 
   const [proposals, setProposals] = useState(null)
   const [quorum, setQuorum] = useState(null)
