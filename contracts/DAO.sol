@@ -14,7 +14,8 @@ contract DAO {
         string name;
         uint256 amount;
         address payable recipient;
-        uint256 votes;
+        uint256 upVotes;   // Changed from 'votes' to 'upVotes'
+        uint256 downVotes;  // Added to track negative votes
         bool finalized;
     }
 
@@ -29,7 +30,7 @@ contract DAO {
         address recipient,
         address creator
     );
-    event Vote(uint256 id, address investor);
+    event Vote(uint256 id, address investor, bool inFavor);
     event Finalize(uint256 id);
 
     constructor(Token _token, uint256 _quorum) {
@@ -65,6 +66,7 @@ contract DAO {
             _amount,
             _recipient,
             0,
+            0,
             false
         );
 
@@ -76,7 +78,43 @@ contract DAO {
         );
     }
 
-    // Vote on proposal
+    // Vote in favor of proposal
+    function upVote(uint256 _id) external onlyInvestor {
+        // Fetch proposal from mapping by id
+        Proposal storage proposal = proposals[_id];
+
+        // Don't let investors vote twice
+        require(!votes[msg.sender][_id], "already voted");
+
+        // update votes
+        proposal.upVotes += token.balanceOf(msg.sender);
+
+        // Track that user has voted
+        votes[msg.sender][_id] = true;
+
+        // Emit an event
+        emit Vote(_id, msg.sender, true); // Added true to indicate upvote
+    }
+
+    // Vote against a proposal
+    function downVote(uint256 _id) external onlyInvestor {
+        // Fetch proposal from mapping by id
+        Proposal storage proposal = proposals[_id];
+
+        // Don't let investors vote twice
+        require(!votes[msg.sender][_id], "already voted");
+
+        // update down votes
+        proposal.downVotes += token.balanceOf(msg.sender);
+
+         // Track that user has voted
+        votes[msg.sender][_id] = true;
+
+        // Emit an event
+        emit Vote(_id, msg.sender, false); // boolean 'false' indicates a down vote
+    }
+
+    // For backward compatibility - implements same behavior as upVote
     function vote(uint256 _id) external onlyInvestor {
         // Fetch proposal from mapping by id
         Proposal storage proposal = proposals[_id];
@@ -85,16 +123,16 @@ contract DAO {
         require(!votes[msg.sender][_id], "already voted");
 
         // update votes
-        proposal.votes += token.balanceOf(msg.sender);
+        proposal.upVotes += token.balanceOf(msg.sender);
 
         // Track that user has voted
         votes[msg.sender][_id] = true;
 
         // Emit an event
-        emit Vote(_id, msg.sender);
+        emit Vote(_id, msg.sender, true);
     }
 
-    // Finalize proposal & tranfer funds
+    // Finalize proposal & transfer funds
     function finalizeProposal(uint256 _id) external onlyInvestor {
         // Fetch proposal from mapping by id
         Proposal storage proposal = proposals[_id];
@@ -105,8 +143,14 @@ contract DAO {
         // Mark proposal as finalized
         proposal.finalized = true;
 
+        // Calculate net votes (upVotes minus downVotes)
+        uint256 netVotes = 0;
+        if (proposal.upVotes > proposal.downVotes) {
+            netVotes = proposal.upVotes - proposal.downVotes;
+        }
+
         // Check that proposal has enough votes
-        require(proposal.votes >= quorum, "must reach quorum to finalize proposal");
+        require(netVotes >= quorum, "must reach quorum to finalize proposal");
 
         // Check that the contract has enough ether
         require(address(this).balance >= proposal.amount);
@@ -118,5 +162,4 @@ contract DAO {
         // Emit event
         emit Finalize(_id);
     }
-
 }

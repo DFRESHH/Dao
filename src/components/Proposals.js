@@ -1,12 +1,24 @@
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { ethers } from 'ethers'
 
 const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
-  const voteHandler = async (id) => {
+  const upVoteHandler = async (id) => {
     try {
       const signer = await provider.getSigner()
-      const transaction = await dao.connect(signer).vote(id)
+      const transaction = await dao.connect(signer).upVote(id)                  
+      await transaction.wait()
+    } catch {
+      window.alert('User rejected or transaction reverted')
+    }
+    setIsLoading(true)
+  }
+
+  const downVoteHandler = async (id) => {
+    try {
+      const signer = await provider.getSigner()
+      const transaction = await dao.connect(signer).downVote(id)
       await transaction.wait()
     } catch {
       window.alert('User rejected or transaction reverted')
@@ -14,7 +26,7 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
 
     setIsLoading(true)
   }
-
+  
   const finalizeHandler = async (id) => {
     try {
       const signer = await provider.getSigner()
@@ -26,6 +38,15 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
 
     setIsLoading(true)
   }
+
+    // Calculate net votes for a proposal
+  const calculateNetVotes = (proposal) => {
+      const upVotes = ethers.BigNumber.from(proposal.upVotes || 0)
+      const downVotes = ethers.BigNumber.from(proposal.downVotes || 0)
+      return upVotes.gt(downVotes) 
+        ? upVotes.sub(downVotes).toString() 
+        : '0'
+    }
 
   return (
     <Table striped bordered hover responsive>
@@ -55,7 +76,7 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
                 <Button
                   variant="primary"
                   style={{ width: '100%' }}
-                  onClick={() => voteHandler(proposal.id)}
+                  onClick={() => upVoteHandler(proposal.id)}
                 >
                   Vote
                 </Button>
@@ -76,7 +97,7 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
         ))}
       </tbody>
     </Table>
-  );
-}
+    );
+  }
 
 export default Proposals;

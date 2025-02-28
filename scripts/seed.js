@@ -61,15 +61,15 @@ async function main() {
       await transaction.wait()
 
       // Vote 1
-      transaction = await dao.connect(investor1).vote(i + 1)
+      transaction = await dao.connect(investor1).upVote(i + 1)
       await transaction.wait()
 
       // Vote 2
-      transaction = await dao.connect(investor2).vote(i + 1)
+      transaction = await dao.connect(investor2).upVote(i + 1)
       await transaction.wait()
 
       // Vote 3
-      transaction = await dao.connect(investor3).vote(i + 1)
+      transaction = await dao.connect(investor3).upVote(i + 1)
       await transaction.wait()
 
       // Finalize
@@ -86,11 +86,11 @@ async function main() {
     await transaction.wait()
 
     // Vote 1
-    transaction = await dao.connect(investor2).vote(4)
+    transaction = await dao.connect(investor2).upVote(4)
     await transaction.wait()
 
     // Vote 2
-    transaction = await dao.connect(investor3).vote(4)
+    transaction = await dao.connect(investor3).downVote(4)
     await transaction.wait()
 
     console.log(`Finished.\n`)
