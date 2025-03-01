@@ -86,7 +86,23 @@ function App() {
 
           <hr/>
 
-          <p className='text-center'><strong>Treasury Balance:</strong> {treasuryBalance} ETH</p>
+          <div className="d-flex justify-content-center mb-3">
+            <div className="card text-center" style={{ maxWidth: '600px', width: '100%' }}>
+              <div className="card-body">
+                <h5 className="card-title">DAO Information</h5>
+                <div className="row">
+                  <div className="col-md-6">
+                    <p className="mb-1"><strong>Treasury Balance:</strong></p>
+                    <h4>{treasuryBalance} ETH</h4>
+                  </div>
+                  <div className="col-md-6">
+                    <p className="mb-1"><strong>Quorum Required:</strong></p>
+                    <h4>{quorum ? ethers.utils.formatUnits(quorum, 18) : 0} tokens</h4>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <hr/>
 
